@@ -1,0 +1,57 @@
+body{
+    background-color: rgb(255, 255, 255);
+}
+nav{
+    background-color: #E60012;
+}
+
+
+
+// ----------- HOME PAGE
+.hero-section{
+    background-color: #E60012;
+    align-items: center;
+    color: white;
+    div{
+        margin: 3em;
+    }
+    h1{
+        font-size: 3em;
+    }
+    
+}
+
+
+
+// ----------- ADMIN PAGE
+
+// Lista prodotti Admin Page
+article ul{
+    li{
+        margin: 1em 0;
+        background-color: #dde1e6;
+        font-size: 0.8em;
+        display: flex;
+        span{
+            font-size: 1.5em;
+        }
+        .col-1{
+            text-align: center;
+            background-color: #cdc3c3;
+        }
+        .col-9{
+            padding: 1em;
+        }
+        
+    }
+}
+
+// Form creazioni prodotti Admin Page
+section input:required{
+    &:invalid {
+        background-color: #f4e0e0;
+    }
+    &:valid {
+        background-color: #e1f4e0;
+    }
+}
