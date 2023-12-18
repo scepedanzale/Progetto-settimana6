@@ -67,6 +67,7 @@ fetch(url, {
 document.addEventListener('DOMContentLoaded', () => {
     createCards()
     createList()
+
     let btnCreate = document.querySelector('#btnCreate');
     btnCreate.addEventListener('click', createProduct)
 })
@@ -88,10 +89,9 @@ function createProduct(){
     let brand = document.querySelector('#brand').value;
     let imageUrl = document.querySelector('#img').value;
     let price = document.querySelector('#price').value;
-    let input = document.querySelectorAll('form input');
-    if(!array.includes(name)){
-        input.forEach((el)=>{
-            if(!el == ''){
+    
+    if(!array.includes(name) && name.length >=2 && description.length>=10 && brand.length >=2){
+        
                 array.push(name);
                 let obj = new Product(name, description, brand, imageUrl, price)
                 fetch(url, {          // Chiamata POST - Crea elemento
@@ -105,16 +105,8 @@ function createProduct(){
                 .then(response => response.json())
                 .then(json => console.log(json))
                 .catch(error => console.log(error))
-            }else{
-                alert('Compila tutti i campi')
-            }
-        })
-        
-    }else{
-        alert('Questo prodotto esiste già')
-    }
-
-   console.log(array)
+                console.log(array)
+    }       
 }
 
 // Creazione cards home page
@@ -133,6 +125,7 @@ function createCards(){
         for(const element of json){  // crea card a ogni elemento di json
             let col = document.createElement('div');
             col.className = 'col-12';
+            col.classList.add('my-4')
             col.innerHTML = `
                     <div class="card shadow h-100">
                         <img src="${element.imageUrl}" class="card-img-top" style="height: 10em; object-fit: cover;" alt="Immagine di : ${element.name}">
@@ -171,17 +164,55 @@ function createList(){
             
                 <div class="col-3 bg-light"> 
                     
-                    <div class="col-12 bg-light d-flex justify-content-center my-4"><button class="btn w-75 btn-primary">Update</button></div>
-                    <div class="col-12 bg-light d-flex justify-content-center"><button class="btn w-75 btn-danger">Delete</button></div>
+                    <div class="col-12 bg-light d-flex justify-content-center my-4"><button class="btn w-75 btn-primary btnUpdate " data-bs-toggle="modal" data-bs-target="#exampleModal">Update</button></div>
+                        <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h1 class="modal-title fs-5" id="exampleModalLabel">Modifica prodotto</h1>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <form>
+                                            <div class="input-group mb-3">
+                                                <span class="input-group-text" id="basic-addon1">Nome prodotto</span>
+                                                <input type="text" id="nome" class="form-control" minlength="2" value="${element.name}" autofocus>
+                                            </div>
+                                            <div class="input-group mb-3">
+                                                <span class="input-group-text" id="basic-addon1">Descrizione</span>
+                                                <textarea id="description" class="form-control" minlength="10">${element.description}</textarea>
+                                            </div>
+                                            <div class="input-group mb-3">
+                                                <span class="input-group-text" id="basic-addon1">Brand</span>
+                                                <input id="brand" type="text" class="form-control" minlength="2" value="${element.brand}">
+                                            </div>
+                                            <div class="input-group mb-3">
+                                                <span class="input-group-text" id="basic-addon1">Image</span>
+                                                <input id="img" type="text" class="form-control" value="${element.imageUrl}">
+                                            </div>
+                                            <div class="input-group mb-3">
+                                                <span class="input-group-text" id="basic-addon1">Prezzo</span>
+                                                <input id="price" type="number" class="form-control" value="${element.price}">
+                                            </div>
+                                        </form>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                        <button type="button" id="save" class="btn btn-primary" onclick="updateElement('${element._id}', '${element.name}', '${element.description}', '${element.brand}', '${element.imageUrl}', '${element.price}')">Save changes</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    <div class="col-12 bg-light d-flex justify-content-center"><button class="btn w-75 btn-danger btnDelete" onclick="deleteElement('${element._id}', '${element.name}')">Delete</button></div>
                     
                 </div>
                 <div class="col-9 my-auto overflow-auto"> 
-                    <p class="m-0"><strong>ID: </strong>${element._id} </p>
-                    <p class="m-0"><strong>Name: </strong>${element.name} </p>
-                    <p class="m-0"><strong>Description: </strong>${element.description} </p>
-                    <p class="m-0"><strong>Brand: </strong>${element.brand} </p>
-                    <p class="m-0"><strong>Image: </strong>${element.imageUrl} </p>
-                    <p class="m-0"><strong>Price: </strong>${element.price}€ </p>
+                    <p class="m-0"><strong>ID: </strong> <span class="id">${element._id}</span> </p>
+                    <p class="m-0"><strong>Name: </strong><span>${element.name}</span> </p>
+                    <p class="m-0"><strong>Description: </strong><span>${element.description}</span> </p>
+                    <p class="m-0"><strong>Brand: </strong><span>${element.brand}</span> </p>
+                    <p class="m-0"><strong>Image: </strong><span>${element.imageUrl}</span> </p>
+                    <p class="m-0"><strong>Price: </strong> <span>${element.price}€</span> </p>
                 </div>
                 `
 
@@ -192,13 +223,38 @@ function createList(){
 }
 
 // Chiamata PUT - Modifica singolo elemento
-function updateElement(){
+function updateElement(id, name, description, brand, imageUrl, price){
+    array.forEach((el, i)=>{
+        if(el === name){
+            array.splice(i, 1)
+            console.log(array)
+        }
+    })
+        if(!array.includes(name) && name.length >=2 && description.length>=10 && brand.length >=2){
+        
+            array.push(name);
+            let obj = new Product(name, description, brand, imageUrl, price)
+            fetch(url + id, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': 'Bearer '+token,
+                    'Content-type': 'application/json'
+                },
+                body: JSON.stringify(obj)
+            })
+            .then(response => response.json())
+            .catch(error => console.log(error))
+            console.log(array)
+    }       
 
 }
 
 // Chiamata DELETE - Elimina singolo elemento
-function deleteElement(){
-    fetch(url +'657995677c0dd90018c938b2', {
+function deleteElement(id, name){
+    /* let btnDelete = document.querySelectorAll('.btnDelete'); */
+    
+    if(confirm("Vuoi eliminare l'elemento?")==true){
+        fetch(url + id, {
         method: 'DELETE',
         headers: {
             'Authorization': 'Bearer '+token,
@@ -206,6 +262,18 @@ function deleteElement(){
         }
     })
     .then(response => response.json())
+    .then(json => {
+        console.log(json);
+        array.forEach((el, i)=>{
+            if(el === name){
+                array.splice(i, 1)
+                console.log(array)
+            }
+        })
+        location.reload()
+    })
     .catch(error => console.log(error))
+    }
+    //console.log(btnDelete)
+    
 }
-deleteElement()
